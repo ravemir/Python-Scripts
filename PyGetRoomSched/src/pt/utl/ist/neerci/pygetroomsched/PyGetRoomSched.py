@@ -11,7 +11,7 @@ import re
 
 def get_table_from_url(url):
     
-    # Open the url and read the contents into a string
+    # Open the URL and read the contents into a string
     f = urllib.urlopen(url)
     s = f.read()
     f.close()
@@ -19,8 +19,6 @@ def get_table_from_url(url):
     # Get the 'timetable' table element
     soup = BeautifulSoup.BeautifulSoup(s)
     sched = soup.find("table", {"class": "timetable"})
-#    if sched != None
-#        soup.find("table", {"class": "timetable"})
     
     return sched
 
@@ -45,7 +43,7 @@ def convert_html_to_android(table):
             if cellElement["class"] != "period-empty-slot":
                 # Mark line with '1'
                 matrix += "1"
-            # ...if not
+            # ...if not...
             else:
                 # Mark line with '0'
                 matrix += "0"
@@ -59,58 +57,70 @@ def convert_html_to_android(table):
         
     return matrix
 
-
+# Gets all the names of the rooms with schedules
 def get_room_names():
-    # Get the relevant page list
-#    f = urllib.urlopen("https://fenix.ist.utl.pt/publico/findSpaces.do",
-#                       '_request_checksum_:f67a3295c65e704ecd76a260bd9c1c154de2248f&contentContextPath_PATH:%2Fconteudos-publicos%2Fpesquisa-de-espacos&method:search&net.sourceforge.fenixedu.dataTransferObject.spaceManager.FindSpacesBean%3A1082671433%3AsearchType:SPACE&net.sourceforge.fenixedu.dataTransferObject.spaceManager.FindSpacesBean%3A1082671433%3AlabelToSearch:&net_sourceforge_fenixedu_dataTransferObject_spaceManager_FindSpacesBean_1082671433_campuspostback:&net.sourceforge.fenixedu.dataTransferObject.spaceManager.FindSpacesBean%3A1082671433%3Acampus:net.sourceforge.fenixedu.domain.space.Campus%3A2465311230082&net.sourceforge.fenixedu.dataTransferObject.spaceManager.FindSpacesBean%3A1082671433%3Abuilding:net.sourceforge.fenixedu.domain.space.Building%3A2972117375196&pt.ist.fenixWebFramework.renderers.components.state.LifeCycleConstants.VIEWSTATE_LIST:H4sIAAAAAAAAALVXy28bRRifOHHjpI80SZUiVGiQgoRA2c2DlpbSh%2BPExeDQCKetGlSJ8e44nmY8O8zMOk4RFXCouHDgAAKJHjggLvwBCCROSJyQAIkLB06ISwUXJJCAA9%2FMru11nbSmLXtY7cx%2B8z1%2B33M%2B%2FRWllUTjV3AdO6GmzMlKibeKVOnGG98%2F9MHX%2BEY%2F6iugAUWvkoZACPVtDsB7GA6dFNoBOqdCOG1cJOW8xDWyGcgNRxLuE0mkcrygJgJOuFaO0lgT5wIlmyXz9d7vhz9n2V8GU2h0DWVEoPQC9jbWgPMGFeeFDyRraJ9ZXMCMwpIGfA2Nh%2FZPrsl2VRIgS9cNyRoarFNFy4wU0TDWWtJyqInSaKRozHONee4yFieKaI8XcE0aOsewAoLRiIBhvu7aLSAZ80IJduhF4EC5Fa%2FRUlFoF2x2u2x2Wza7bZtda7NrbE6wMfL99lK9gq6h%2FiLaXaW%2BT3iJBRpU2p%2FQ2XgDDqWor9FYQtUSmMjX4c9%2BykWY1NSwTBfRLoa3glCb1SBgUiManytfIZ7W6EgvltQCnwBkrWMgaljIQBCpqQF2IqHkSmsfqAZCBd%2Foqd6FnIcDBTBfU711Igq0vr7OyHwWq6rG4N7xL0YefeS5nz%2FrR6k8GmYB9vPY04EsoCFdlURVA%2BY3xOkzyDyZzQy8d5vPRl2iYz0FrQ0O5RQMrLlohdpPQwjrtD1dIvp0O5RB%2BdzdZkjClZe%2Bemeo%2F5mbN1KoH%2FJEEp9K8AT4FnALGYl9OyCwrtpvwA6UcEVYZtQLNJp1K5T7JYE9ohw%2FOA1BUA38k0ISgSUpESy9avR3JVa8ITQ6WCaYX6S6WsRlwlaDiK6waO0eQ%2BZ94G54azQILgwZlgDP8R7gsdHhlGhNMJIIxJ%2B%2B0z9%2B8vZNAAVqkwc0kAQWSUU1CNYazholdwFQQRzyydSJ2TQkmu9Zibb45YX8xh%2BPv5lJmSQb9CTBEH0aPd17uBc4OJt7JBedPdGZ%2FrHmiVwzO0Owo7wqqeEXgG3s%2BLRqHWiGpX2iKt0AlA%2B0M6ido8fHvr0qjp56P4X6iijjkwoOWcRmqLF9aCMTFpMrNqzyLa%2BbEFlqaInPCVvLWgoMtNrE7H8C2Nj%2F9xOHP%2F7zXTaRQvsh5KnKYbDat9GP%2FXOcba2hvcr6uLDOA0gJcHI55H4rG4Ygg%2BtgKJFmY8DWW2shtJKwSbQbarAnqWjWS9gaTWzlA1nDzdI5VCVM2FRobjCzyMr1mXgjYzeeJ1vxesfSa3YykLC87cPhetThglbMjtSNosudh6xjDm3jY7Mx2eWwlG6iAkm3uJTPni%2Buwpdn%2Bpsp3vsYeGVuklHKGeVku%2BiBV%2FussI9Gh6yljsl8R5kgcJRNdEdvCRCVltingeH0sAb%2F21%2Br8KeLeSRuqmd7oLbaKUSj1PxMz9oevFVb5dgdEWu4lyUL3D0rOaBtXLUnhlY7SGoPYiG16xSiP55ALnGiHRWE0iOVQK6TKFuIHzpQTBV0B8tulRKZyJomDxVZtow5XgeCHK6JUK3EPyEKKjaUNZqaetUSFni0Axw72Juy8toOyJqt6SaoD3SD6lmhGh2oER5OK8IgaqeN7WWwPcZ6V0R0zyCnuvF76T7itxBS5sNg9X8i%2BGA3guVYLERQAsMYukzzbzd4jTNvZQvbFf6zO2ICtQavSsxVhciowHQi0K7vCzAGXB9MX%2F%2Fno4kvU2gYuiz2sE9q1CvAVCShTGlUKIIgNyHIbQpy%2FaCGKXc1rRHXwwyQxxKm1tDToSRu9hZW0AVHm3a%2BSEA3Ah1So5k78rfKu02%2FAZuRKNISTJwemUTJY0Z0kmhrGo0nhoeFIGCACxB1Vo9mOW8XPY3Kt5Hb5QU36QW30wtT0WckKSdhzJEUGxmgxkQUKyQiT1g93aPV9hwwGrLLlXiWhEa0ZxMafMm033jWvAzSzN5F0EATvmQaVfsacxliX0DonUr2%2FEqr4Qula062rABYTy9aBSLDp0rGGgb10Td9N56z%2B%2Bx00h9QP55sIe%2Fnnjx6ZH52dm5%2BZubYHEgatdONcYsTu%2BWbSfn6Dx%2F%2B9Rscjm6GIfQ2aB7omkQv36eU2NEZzSvCGMxLEu1rK7fEw1ryJ9iSLq1kc0umHtymznkBC2s8FzVtQ1ZJ9vBRXWWkoidDxgFNuU55w8B%2F9o4jF8xshCvjNqdi704wEzp5Q568iHX4Ib7TPbbzkKsI3JnhmL3MwSVONP4FsjD7JF8QAAA%3D')
-#    s = f.read()
-#    f.close()
-
-    f = open("page.html", "r")
+    # Get the page with the room list (includes POST data)
+    f = urllib.urlopen("https://fenix.ist.utl.pt/publico/findSpaces.do",
+                        '_request_checksum_=f67a3295c65e704ecd76a260bd9c1c154de2248f&'+
+                        'contentContextPath_PATH=%2Fconteudos-publicos%2Fpesquisa-de-espacos&'+
+                        'method=search&'+
+                        'net.sourceforge.fenixedu.dataTransferObject.spaceManager.FindSpacesBean%3A764323587%3AsearchType=SPACE&'+
+                        'net.sourceforge.fenixedu.dataTransferObject.spaceManager.FindSpacesBean%3A764323587%3AlabelToSearch=&'+
+                        'net_sourceforge_fenixedu_dataTransferObject_spaceManager_FindSpacesBean_764323587_campuspostback=&net.sourceforge.fenixedu.dataTransferObject.spaceManager.FindSpacesBean%3A764323587%3Acampus=net.sourceforge.fenixedu.domain.space.Campus%3A2465311230082&'+
+                        'net.sourceforge.fenixedu.dataTransferObject.spaceManager.FindSpacesBean%3A764323587%3Abuilding=net.sourceforge.fenixedu.domain.space.Building%3A2972117375196&'+
+                        'pt.ist.fenixWebFramework.renderers.components.state.LifeCycleConstants.VIEWSTATE_LIST=H4sIAAAAAAAAALVXzW8bRRSfOEnjpC1pkipFqNAgBQmBspsPWlpKWxInLgaHRjht1aAexrtje5rx7DAz62yKQMChN5A4gECiBw6oF%2F4ABBInJE5IgMSFAyfEpYILEkjAgTeza3tdJ61pYQ%2Brndk37%2BP3PueTX9CgkmjiCm5gJ9SUOYtS4u0iVTp647sHP%2FgKX%2B9HfQU0oOhVEgmEUN%2FWALxH4NApoR2gcyqE0%2BgiKeclrpOtQG46knCfSCKV4wV1EXDCtXKUxpo4FyjZKpmv93478hlb%2FHkog8Y2UFYESi9hb3MDOG9ScV74QLKB7jOLC5hRWNKAb6CJ0P7JNdmuSwJkgw1DsoGGGlTRMiNFNIK1lrQcaqI0Gi0a81xjnruKxcki2ucFXJNI5xhWQDAWEzDMq67dApJxL5Rgh14GDpRb8RqtFIV2wWa3y2a3ZbPbttm1NrvG5hQbI99vL9XL6DXUX0R7a9T3CS%2BxQINKB1I6G2%2FAoQz1NRpPqVoCE3kV%2FhygXIRpTQ3LwSLaw%2FB2EGqzGgJM6kTjc%2BUrxNMaHe3FknrgE4CsdQxEjQgZCCI1NcBOppRca%2B0D1UCo4Bs92buQ83CgAOZrqrdPxoHW19cZmc9iVdMY3Dvx%2BegjDz%2F306f9KJNHIyzAfh57OpAFNKxrkqhawPxInHkGmSe7lYX3XvMZNSQ63lPQ2uBQTsHAmotXqP1EQlin7esS0afboQzK5%2B42Q1KuvPTlO8P9T9%2B8nkH9kCeS%2BFSCJ8C3gFvISOLbAYF1zX4DdqCEK8Iyo16g0ZxbodwvCewR5fjBGQiCWuCfEpIILEmJYOnV4r9rieKR0OhQmWB%2BkepaEZcJWw9iusKytXscmffBu%2BGt0RC4MGRYAjwneoDHRodTonXBSCoQf%2FxW%2F3DjrZsACtQmD2ggCSySimoQrDWcNUruAaCCJOTTqZOwiSRa6FmJtvjVpfzm74%2B9mc2YJBvyJMEQfRo91Xu4Fzg4m3skF5892Zn%2BieapXDM7w7CjvBqp4xeAbeL4QdU60AxL%2B8RVOgKUD7YzqJ2jJ8a%2FuSqOnX4%2Fg%2FqKKOuTCg5ZzGY42jm0kQmLqTUbVvmW102IrERa4nPC1rKWAgOtNjH3rwA29v%2F1%2BJGP%2F3iXTWbQAQh5qnIYrPZt9GP%2FHGfbG2i%2Fsj4uVHkAKQFOLofcb2XDMGRwAwwl0mwM2HprLYRWEjaJ9kIN9iQVzXoJW2OprXwg67hZOodrhAmbCs0NZhaLsjqbbGTtxvNkO1nvWnrNThYSlrd9ONKIO1zQitnRhlF0tfOQdczhHXxsNqa6HJbRTVQg6ZZX8ovni%2Bvw5Zn%2BZor3fQy8Mj%2FFKOWMcrJT9MCrfVbYR6PD1lLHZL6jTBA4yia6o7cFiBqU2KeB4fSQBv%2FbX%2Bvwp4t5LG66Z3ugttopRKPMwmzP2h66VVvl2B2RaLifpQvcPSs5oG1ctSeGVjtIaw9iIbUbFKI%2FmUAucaIdFYTSI5VAVkmcLcQPHSimCrqDZbdOiUxlTZOHii1bxRxXgSCH6yJUa8lPiIKKDWWNpqdfsYQFHu8Axw72pqy8uguyZmumCer93aB6VqhGB%2BuEhzOKMIjaGWN7GWxPsN4TE90zyJlu%2FF76D%2FFbCinzYbD6PxF8oBvBciIWIiiFYQJdtvm3G7xo5u0b%2FTsV%2FrO7YgK1Bq9LzFWFyLjAdCLQru9LMAZcGxq89vdHk19k0Ah0Wexhn9SpV4CpSEKZ0qhQBEFuSpDbFOT6QR1T7mpaJ66HGSCPJUytoadDSdzFW1hBFxxr2vkiAd0IdEiNZu%2FI3yrvNv0GbEbjSEsxcXpkEiePGdFJqq1pNJEaHpaCgAEuQNRZPZrlvF30NCrfRm6XF9y0F9xOL0zHn7GknIQxR1JsZIAak3GskJg8ZfVMj1bbc8Bo2C7XklkSGtG%2BLWjwJdN%2Bk1nzMkgzexdBA034imlU7WvMZYh9AaF3Ot3zK62GL5SuO4tlBcB6etkqEBs%2BXTLWMKiPvum7yZzdZ6eT%2FoD6yWQLeT%2F%2FxLGjC3Nz8wuzs8fnQdKYnW6MW5zELV9Pyde%2F%2F%2FDPX%2BFwfDMMobdB80A29W5TUryAhXWei%2FujIauk2%2BWYrjFS0VMh46C4rFIeGUvP3nG6gfGIcGUQcir2mgLjl5M35Ok7T4fJyfXp0d3nSUXgegrH7L0J7ksi%2Bgd36MlGyg8AAA%3D%3D')
     html = f.read()
     f.close()
-
-    roomNames = []
+    
+    # Get the room list table
+    soup = BeautifulSoup.BeautifulSoup(html)
+    html = soup.find('table', {'class': 'tab_lay mtop05'}).prettify()
+    
+    
+    # Initialize the rooms dictionary and the regex...
+    roomUrls = {}
     p = re.compile(r'( - [a-zA-Z])')
     
+    # Get all the 'span' items inside the table...
     soup = BeautifulSoup.BeautifulSoup(html)
     tagList = soup.findAll("span")
     
-    
+    # ...for each one of them...
     for tag in tagList:
+        # ...check if they have inner tags (if not, this table row has no schedule)
         if len(tag.findChildren()) > 0:
+            # ...get the row, fetch all the 'a' tags and access the 4th's text
+            # content, splitting it so we get only the room name...
             room = p.split(tag.findParent(name='tr').findAll('a')[3].text)[0]
             print "Found room with schedule: '" + room + "'"
-            # Apparently the Fenix crew has a different numbering scheme for some rooms 
-            if room[0] == '1' and (room[4] != '6' or (room[5] == '5' or room[5] == '3')):
-                room = ' ' + room
-            roomNames.append(room)
+            
+            # ...and save the corresponding URL, using the roomName as the key
+            roomUrls[room] = "https://fenix.ist.utl.pt" + tag.contents[1]['href'] 
 
-    return roomNames
+    return roomUrls
 
-
+# Main Method
 if __name__ == '__main__':
-    # Get all the room names with schedules
+    # Get all the room names with schedules, and their URLs
     roomNameList = get_room_names()
-#    roomNameList = ["0 - 13",
-#                    "0 - 15",
-#                    "0 - 17"]
+    
+    # Initialize output string
     output = ""
     
-    # Run through the 'roomName' list
-    for roomName in roomNameList:
-        print "Grabbing '" + roomName + "'"
-        table  = get_table_from_url("https://fenix.ist.utl.pt/publico/viewRoom.do?method=roomViewer&roomName=" + roomName +"&contentContextPath_PATH=/conteudos-publicos/pesquisa-de-espacos&")
+    # Run through the 'roomNameList'...
+    for (roomName, roomUrl) in roomNameList.items():
+        # ...opening every link and saving its schedule table...
+        table  = get_table_from_url(roomUrl)
         
-        # Convert table into android array
+        # ...converting the table into the Android format...
         androidArray = convert_html_to_android(table)
         androidArray = roomName + "\n" + androidArray
         
+        #...and adding it to the output string
         output += androidArray
+        
     # Write to file
-    file = open("conv-tables.txt", "w")
-    file.write(output)
-    file.close()
+    f = open("conv-tables.txt", "w")
+    f.write(output)
+    f.close()
     
-#    print output
