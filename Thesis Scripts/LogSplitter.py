@@ -7,11 +7,11 @@ Created on Oct 8, 2012
 import os
 from dircache import listdir
 from string import replace
-from reportlab.lib.validators import matchesPattern
+#from reportlab.lib.validators import matchesPattern
 
 #folder = '/media/storage/Tese/logs/'
-folder = '/home/ravemir/logs/29-10-2012/'
-
+#folder = '/home/ravemir/logs/29-10-2012/'
+folder = 'C:\\Users\\Carlos\\Dropbox\\Tese\\Dissertacao\\Dados\\29-10-2012\\'
 
 # Open each log
 for filename in os.listdir(folder):
