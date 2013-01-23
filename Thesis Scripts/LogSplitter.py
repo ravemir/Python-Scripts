@@ -5,46 +5,78 @@ Created on Oct 8, 2012
 '''
 
 import os
-from dircache import listdir
 from string import replace
+import sys
 #from reportlab.lib.validators import matchesPattern
 
-#folder = '/media/storage/Tese/logs/'
-#folder = '/home/ravemir/logs/29-10-2012/'
-folder = 'C:\\Users\\Carlos\\Dropbox\\Tese\\Dissertacao\\Dados\\29-10-2012\\'
+#defaultFolder = '/media/storage/Tese/logs/'
+#defaultFolder = '/home/ravemir/logs/29-10-2012/'
+defaultFolder = 'C:\\Users\\Carlos\\Dropbox\\Tese\\Dissertacao\\Dados\\'
 
-# Open each log
-for filename in os.listdir(folder):
-    if filename.endswith('.log'):
-        print "Opening '" + filename + "'..."
-        log = open(folder + filename, 'r')
-    
-        # Create the folder to contain the new files
-        convPath = folder + 'conv/'
-        try:
-            os.stat(convPath)
-        except:
-            os.mkdir(convPath)
-            
-        # Create corresponding 'accel' and 'loc' files 
-        accel = open(convPath + filename + ".accel", 'w')
-        loc = open(convPath + filename + ".loc", 'w')
+def main(arg1 = defaultFolder):
+    # Open each log
+    for filename in os.listdir(arg1):
+        fullPath = arg1 + filename
+        if os.path.isdir(fullPath):
+            main(fullPath + os.sep)
+        elif filename.endswith('.log') and os.path.isfile(fullPath):
+            print "Opening '" + filename + "'..."
+            log = open(arg1 + filename, 'r')
         
-        # Read each line
-        for line in log.readlines(): # FIXME: loading all lines at once spends alot of memory
-            # If the first character is 'A'
-            if line[0] == 'A':
-                # Write the rest of the line to the 'accel' filename
-                line = replace(line, 'A, ', '')
-                accel.write(line)
-            # If the first character is 'L'
-            if line[0] == 'L':
-                # Write the rest of the line to the 'loc' filename
-                line = replace(line, 'L, ', '')
-                loc.write(line)
-    
-        # Close the files
-        accel.close()
-        loc.close()
-        log.close()
-print "Done!"
+            # Create the defaultFolder to contain the new files
+            convPath = arg1 + 'conv/'
+            try:
+                os.stat(convPath)
+            except:
+                os.mkdir(convPath)
+                
+            # Create corresponding 'accel' and 'loc' files 
+            accel = open(convPath + filename + ".accel", 'w')
+            info = open(convPath + filename + ".info", 'w')
+            loc = open(convPath + filename + ".loc", 'w')
+            mag = open(convPath + filename + ".mag", 'w')
+            ori = open(convPath + filename + ".ori", 'w')
+            
+            # Declare log entry tags
+            logTags = ['A,','I,','L,','M,','O,'];
+            
+            # Read each line
+            for line in log.readlines(): # FIXME: loading all lines at once spends alot of memory
+                # Match the beginning of the line with the declared tags
+                if line.startswith(logTags[0]):
+                    # Write the rest of the line to the 'accel' filename
+                    line = replace(line, logTags[0], '')
+                    accel.write(line)
+                # If the first character is 'I'
+                elif line.startswith(logTags[1]):
+                    # Write the rest of the line to the 'info' filename
+                    line = replace(line, logTags[1], '')
+                    info.write(line)
+                elif line.startswith(logTags[2]):
+                    # Write the rest of the line to the 'loc' filename
+                    line = replace(line, logTags[2], '')
+                    loc.write(line)
+                elif line.startswith(logTags[3]):
+                    # Write the rest of the line to the 'loc' filename
+                    line = replace(line, logTags[3], '')
+                    mag.write(line)
+                elif line.startswith(logTags[4]):
+                    # Write the rest of the line to the 'loc' filename
+                    line = replace(line, logTags[4], '')
+                    ori.write(line)
+        
+            # Close the files
+            log.close()
+            accel.close()
+            info.close()
+            loc.close()
+            mag.close()
+            ori.close()
+            print "Done!"
+
+if __name__ == '__main__':
+    if len(sys.argv) == 2:
+        main(sys.argv)
+    else:
+        main()
+    print 'Finished!'
