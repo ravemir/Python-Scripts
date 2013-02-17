@@ -90,7 +90,7 @@ def get_room_names():
         # ...check if they have inner tags (if not, this table row has no schedule)
         if len(tag.findChildren()) > 0:
             # ...get the row, fetch all the 'a' tags and access the 4th's text
-            # content, splitting it so we get only the room name...
+            # content, splitting it so we get only the room name....
             room = p.split(tag.findParent(name='tr').findAll('a')[4].text)[0]
             print "Found room with schedule: '" + room + "'"
             
