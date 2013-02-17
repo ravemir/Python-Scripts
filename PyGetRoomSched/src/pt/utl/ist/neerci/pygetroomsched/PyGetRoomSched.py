@@ -91,7 +91,7 @@ def get_room_names():
         if len(tag.findChildren()) > 0:
             # ...get the row, fetch all the 'a' tags and access the 4th's text
             # content, splitting it so we get only the room name...
-            room = p.split(tag.findParent(name='tr').findAll('a')[3].text)[0]
+            room = p.split(tag.findParent(name='tr').findAll('a')[4].text)[0]
             print "Found room with schedule: '" + room + "'"
             
             # ...and save the corresponding URL, using the roomName as the key
