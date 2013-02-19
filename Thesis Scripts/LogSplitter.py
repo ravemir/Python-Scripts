@@ -36,9 +36,10 @@ def main(arg1 = defaultFolder):
             loc = open(convPath + filename + ".loc", 'w')
             mag = open(convPath + filename + ".mag", 'w')
             ori = open(convPath + filename + ".ori", 'w')
+            steps = open(convPath + filename + ".step", 'w')
             
             # Declare log entry tags
-            logTags = ['A,','I,','L,','M,','O,'];
+            logTags = ['A,','I,','L,','M,','O,','S,'];
             
             # Read each line
             for line in log.readlines(): # FIXME: loading all lines at once spends alot of memory
@@ -57,13 +58,17 @@ def main(arg1 = defaultFolder):
                     line = replace(line, logTags[2], '')
                     loc.write(line)
                 elif line.startswith(logTags[3]):
-                    # Write the rest of the line to the 'loc' filename
+                    # Write the rest of the line to the 'mag' filename
                     line = replace(line, logTags[3], '')
                     mag.write(line)
                 elif line.startswith(logTags[4]):
-                    # Write the rest of the line to the 'loc' filename
+                    # Write the rest of the line to the 'ori' filename
                     line = replace(line, logTags[4], '')
                     ori.write(line)
+                elif line.startswith(logTags[5]):
+                    # Write the rest of the line to the 'steps' filename
+                    line = replace(line, logTags[5], '')
+                    steps.write(line)
         
             # Close the files
             log.close()
