@@ -57,6 +57,19 @@ def convert_html_to_android(table):
         
     return matrix
 
+def determine(item):
+    roomFilter = ['0 - 65','0 - 67','0 - 69',
+                  '1 - 14','1 - 26','1 - 28',
+                  '1 - 31','1 - 32',
+                  'A1','A2','A3','A4','A5']
+    
+    # Filter the rooms
+    for room in roomFilter:
+        if room == item:
+            return True
+    
+    return False
+
 # Gets all the names of the rooms with schedules
 def get_room_names():
     # Get the page with the room list (includes POST data)
@@ -104,8 +117,16 @@ if __name__ == '__main__':
     # Get all the room names with schedules, and their URLs
     roomNameList = get_room_names()
     
-    # Initialize output string
+    # Initialize output string and the room filter
     output = ""
+    roomFilter = ['0 - 65','0 - 67','0 - 69',
+                  '1 - 14','1 - 26','1 - 28',
+                  '1 - 31','1 - 32',
+                  'A1','A2','A3','A4','A5']
+    
+    # Filter the specified rooms...
+    for room in roomFilter:
+        roomNameList.pop(room)
     
     # Run through the 'roomNameList'...
     for (roomName, roomUrl) in roomNameList.items():
@@ -116,8 +137,12 @@ if __name__ == '__main__':
         androidArray = convert_html_to_android(table)
         androidArray = roomName + "\n" + androidArray
         
+        # ...print the room..
+        print roomName
+        
         #...and adding it to the output string
         output += androidArray
+        
         
     # Write to file
     f = open("conv-tables.txt", "w")
