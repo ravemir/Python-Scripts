@@ -1,7 +1,13 @@
 '''
-Created on 21 de Set de 2012
+A script that fetches the timetables of every room in Taguspark,
+and outputs a format adequate to be read from the Study@Tagus 
+application.
+
+Depends on the BeautifulSoup library for advanced HTML parsing.
 
 @author: ravemir
+@organization: NEERCI
+@since: 21/09/2012
 '''
 
 import urllib
@@ -9,6 +15,7 @@ import urllib
 import BeautifulSoup
 import re
 
+# Grabs the 'timetable' element from the specified URL
 def get_table_from_url(url):
     
     # Open the URL and read the contents into a string
@@ -22,7 +29,8 @@ def get_table_from_url(url):
     
     return sched
 
-
+# Converts the HTML room snippet to the format used
+# in the Study@Tagus application 
 def convert_html_to_android(table):
     # Make soup for the table
     if table == None:
@@ -53,7 +61,6 @@ def convert_html_to_android(table):
         # Add "\n"
         if len(matrix) > 0:
             matrix += "\n"
-                
         
     return matrix
 
@@ -114,6 +121,7 @@ if __name__ == '__main__':
     # Filter the specified rooms...
     for room in roomFilter:
         roomNameList.pop(room)
+        print "Filtering out room '" + room + "'"
     
     # Run through the 'roomNameList'...
     for (roomName, roomUrl) in roomNameList.items():
@@ -123,9 +131,6 @@ if __name__ == '__main__':
         # ...converting the table into the Android format...
         androidArray = convert_html_to_android(table)
         androidArray = roomName + "\n" + androidArray
-        
-        # ...print the room..
-        print roomName
         
         #...and adding it to the output string
         output += androidArray
