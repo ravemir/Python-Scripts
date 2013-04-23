@@ -12,7 +12,6 @@ Depends on the BeautifulSoup library for advanced HTML parsing.
 '''
 
 import urllib
-
 import BeautifulSoup
 import re
 
