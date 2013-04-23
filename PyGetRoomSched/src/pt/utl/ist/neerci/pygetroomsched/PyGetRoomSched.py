@@ -57,19 +57,6 @@ def convert_html_to_android(table):
         
     return matrix
 
-def determine(item):
-    roomFilter = ['0 - 65','0 - 67','0 - 69',
-                  '1 - 14','1 - 26','1 - 28',
-                  '1 - 31','1 - 32',
-                  'A1','A2','A3','A4','A5']
-    
-    # Filter the rooms
-    for room in roomFilter:
-        if room == item:
-            return True
-    
-    return False
-
 # Gets all the names of the rooms with schedules
 def get_room_names():
     # Get the page with the room list (includes POST data)
