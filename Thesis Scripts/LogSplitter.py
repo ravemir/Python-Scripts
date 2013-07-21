@@ -30,17 +30,26 @@ def main(arg1 = defaultFolder):
             except:
                 os.mkdir(convPath)
                 
-            # Create corresponding 'accel' and 'loc' files 
-            accel = open(convPath + filename + ".accel", 'w')
-            info = open(convPath + filename + ".info", 'w')
-            loc = open(convPath + filename + ".loc", 'w')
-            mag = open(convPath + filename + ".mag", 'w')
-            ori = open(convPath + filename + ".ori", 'w')
-            steps = open(convPath + filename + ".step", 'w')
-            world = open(convPath + filename + ".world", 'w')
+            # Create corresponding 'accel' and 'loc' files
+            fileNames = [convPath + filename + ".accel",
+                         convPath + filename + ".info",
+                         convPath + filename + ".loc",
+                         convPath + filename + ".mag",
+                         convPath + filename + ".ori",
+                         convPath + filename + ".step",
+                         convPath + filename + ".world",
+                         convPath + filename + ".pos"]; 
+            accel = open(fileNames[0], 'w')
+            info = open(fileNames[1], 'w')
+            loc = open(fileNames[2], 'w')
+            mag = open(fileNames[3], 'w')
+            ori = open(fileNames[4], 'w')
+            steps = open(fileNames[5], 'w')
+            world = open(fileNames[6], 'w')
+            pos = open(fileNames[7], 'w')
             
             # Declare log entry tags
-            logTags = ['A,','I,','L,','M,','O,','S,','W,'];
+            logTags = ['A,','I,','L,','M,','O,','S,','W,', 'P,'];
             
             # Read each line
             for line in log.readlines(): # FIXME: loading all lines at once spends alot of memory
@@ -74,6 +83,10 @@ def main(arg1 = defaultFolder):
                     # Write the rest of the line to the 'steps' filename
                     line = replace(line, logTags[6], '')
                     world.write(line)
+                elif line.startswith(logTags[7]):
+                    # Write the rest of the line to the 'steps' filename
+                    line = replace(line, logTags[7], '')
+                    pos.write(line)
         
             # Close the files
             log.close()
@@ -82,6 +95,16 @@ def main(arg1 = defaultFolder):
             loc.close()
             mag.close()
             ori.close()
+            world.close()
+            steps.close()
+            pos.close()
+            
+            # Clear all the empty files (smaller than 1KB)
+            for f in fileNames:
+                if os.path.getsize(f) < 1 * 1024:
+                    os.remove(f)
+                    print "...removed " + f
+            
             print "Done!"
 
 if __name__ == '__main__':
