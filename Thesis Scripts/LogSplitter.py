@@ -49,7 +49,7 @@ def main(arg1 = defaultFolder):
             pos = open(fileNames[7], 'w')
             
             # Declare log entry tags
-            logTags = ['A,','I,','L,','M,','O,','S,','W,', 'P,'];
+            logTags = ['A,','I,','L,','M,','O,','S,','W,','P,'];
             
             # Read each line
             for line in log.readlines(): # FIXME: loading all lines at once spends alot of memory
