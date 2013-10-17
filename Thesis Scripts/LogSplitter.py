@@ -80,13 +80,14 @@ def main(arg1 = defaultFolder):
                     line = replace(line, logTags[5], '')
                     steps.write(line)
                 elif line.startswith(logTags[6]):
-                    # Write the rest of the line to the 'steps' filename
+                    # Write the rest of the line to the 'world' filename
                     line = replace(line, logTags[6], '')
                     world.write(line)
                 elif line.startswith(logTags[7]):
-                    # Write the rest of the line to the 'steps' filename
+                    # Write the rest of the line to the 'pos' filename
                     line = replace(line, logTags[7], '')
-                    pos.write(line)
+                    if(line.count(',') == 2):
+                        pos.write(line)
         
             # Close the files
             log.close()
