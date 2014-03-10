@@ -1,3 +1,4 @@
+#!/usr/bin/python
 '''
 A script that fetches the timetables of every room in Taguspark,
 and outputs a format adequate to be read from the Study@Tagus 
@@ -14,6 +15,12 @@ import sys
 import urllib
 import BeautifulSoup
 import re
+import getopt
+
+import pdb
+
+global hostname 
+hostname = "fenix.tecnico.ulisboa.pt"
 
 # Grabs the 'timetable' element from the specified URL
 def get_table_from_url(url):
@@ -32,6 +39,10 @@ def get_table_from_url(url):
 # Converts the HTML room snippet to the format used
 # in the Study@Tagus application 
 def convert_html_to_android(table):
+    return convert_html_to_array(table, '\t','\n')
+
+
+def convert_html_to_array(table, item_separator, line_separator):
     # Make soup for the table
     if table == None:
         print "stop"
@@ -56,11 +67,11 @@ def convert_html_to_android(table):
                 # Mark line with '0'
                 matrix += "0"
             # Add tab
-            matrix += "\t"
+            matrix += item_separator
         
         # Add "\n"
         if len(matrix) > 0:
-            matrix += "\n"
+            matrix += line_separator
         
     return matrix
 
@@ -85,16 +96,16 @@ def generate_rails_command(table, room):
 # Gets all the names of the rooms with schedules
 def get_room_names():
     # Define the fetching strings
-    fenixScheduleUrl = "https://fenix.ist.utl.pt/publico/findSpaces.do"
-    fenixTagusPOSTData = '_request_checksum_=f67a3295c65e704ecd76a260bd9c1c154de2248f&' \
-        'contentContextPath_PATH=%2Fconteudos-publicos%2Fpesquisa-de-espacos&' \
-        'method=search&' \
-        'net.sourceforge.fenixedu.dataTransferObject.spaceManager.FindSpacesBean%3A1082852714%3AsearchType=SPACE&'\
-        'net.sourceforge.fenixedu.dataTransferObject.spaceManager.FindSpacesBean%3A1082852714%3AlabelToSearch=&'\
-        'net_sourceforge_fenixedu_dataTransferObject_spaceManager_FindSpacesBean_1082852714_campuspostback=&'\
-        'net.sourceforge.fenixedu.dataTransferObject.spaceManager.FindSpacesBean%3A1082852714%3Acampus=net.sourceforge.fenixedu.domain.space.Campus%3A2465311230082&'\
-        'net.sourceforge.fenixedu.dataTransferObject.spaceManager.FindSpacesBean%3A1082852714%3Abuilding=net.sourceforge.fenixedu.domain.space.Building%3A2972117375196&'\
-        'pt.ist.fenixWebFramework.renderers.components.state.LifeCycleConstants.VIEWSTATE_LIST=H4sIAAAAAAAAALVXy28bRRifOHFjp480SZUiVGiQglSBspsHLS2ltIkTF4NDIpy2alAlxrvjeJLx7DAz6zhFVMChHDhxAIEEBw7c%2BAMQSJyQOCEBEv8B4oLgggQSD4lvZtf2uk5a0xYf1juz33yP3%2FecT39BaSXR2CauYyfUlDnzUuKdIlW68cb3D33wNf6oH%2FUV0ICi10lDIIT6tgfgOQSHzgntAJ1TIZw2rpByXuIa2Q7kliMJ94kkUjleUBMBJ1wrR2msiXOZku2SeXvvt%2BOfs%2FmfBlNoZB1lRKD0Ava21oHzFhWXhA8k6%2BiQWVzGjMKSBnwdjYX2S67Jdk0SIEvXDck6GqxTRcuMFNEQ1lrScqiJ0mi4aMxzjXnuMhZni%2BiAF3BNGjrHsAKCkYiAYb7h2i0gGfVCCXboReBAuRWv0VJRaBdsdrtsdls2u22bXWuza2xOsDHy%2FfZSvYJuoP4i2l%2Blvk94iQUaVDqc0Nl4Aw6lqK%2FRaELVEpjIN%2BDLYcpFmNTUsEwX0T6Gd4JQm9UgYFIjGq%2BUN4mnNTrZiyW1wCcAWesYiBoSMhBEamqAHU8oudraB6qBUME7erJ3IZfgQAHM11TvnI0Cra%2BvMzKfxaqqMbh37IvhRx957sfP%2BlEqj4ZYgP089nQgCyirq5KoasD8hjh%2FAZlfZjsDz%2F3mtVGX6HRPQWuDQzkFA2suWqH2ryGEddqBLhF9uh3KoHzubjMk4cqrX72T7X%2F6549SqB%2FyRBKfSvAE%2BBZwCxmJfTsgsK7ad8AOlHBFWGbUCzSacSuU%2ByWBPaIcPzgPQVAN%2FHNCEoElKREsvWr0dTVWvCE0OlommF%2BhulrEZcLWgoiusGjtHkXmeeRueGs0CC4MGZYAz5ke4LHR4ZRoTTDSDsS3Ri665X9OfAegQG3ygAaSwCKpqAbBWsNZo%2BQ%2BACqIQz6ZOnE8NySa61mJtvjlhfzW74%2B9mUmZJBv0JMEQfRo91Xu4Fzg4m3skF50925n%2BseaJXDM7WdhRXpXU8AvANnZ8WrUONMPS%2FqIq3QCUj7QzqJ2jZ0a%2FvS5OPfN%2BCvUVUcYnFRyyiE22sXtoIxMWE6s2rPItr5sQWWpoiVeErWUtBQZabWLmPwFs7P%2Fr8eOf%2FPEuG0%2BhwxDyVOUwWO3b6Mf%2BCmc76%2Bigsj4ubPAAUgKcXA6538qGLGRwHQwl0mwM2HprLYRWEjaJ9kMN9iQVzXoJWyOJrXwga7hZOrNVwoRNheYGM4t5uTEdb2TsxvNkJ17vWXrNTgYSlrd9OFSPOlzQitnhulF0ufOQdcyxXXxsNia6HJbSTVQg6RaX8vOXimvw5pn%2BZor3IQZemZ1glHJGOdkteuDRPivsT6Nj1lLHZL6jTBA4yia6o3cEiEpL7NPAcHpYg%2F%2FtpzX40sU8EjfZsz1QW%2B0UolFqbrpnbY%2Feqq1y7I6INTzIkgXunpUc0Dau2hNDqx0ktQexkNp1CtEfTyBXOdGOCkLpkUogN0iULcQPHSimCrqDZbdGiUxkTZOHiixbxhxvAEEO10SoVuOPEAUVG8oaTU6%2BagkLPNoBjh3sTVl5bQ9kzdZUE9QHukH1rFCNjtQID6cUYRC1U8b2MtgeY70vIrpnkFPd%2BL10H%2FFbCCnzYbD6PxF8sBvBciwWIiiBYQxdpvm1G7zGhbfTm7sV%2Fot7YgK1Bq9JzFWFyKjAdCLQru8LMAbcHEzf%2FPvj8S9TaAi6LPawT2rUK8BUJKFMaVQogiA3IchtCnL9oIYpdzWtEdfDDJDHEqbW0NOhJO78LaygC4407XyRgG4EOqRG03fkb5V3m34DNsNRpCWYOD0yiZLHjOgk0dY0GksMDwtBwAAXIOqsHs1y3i56GpVvI7fLC27SC26nFyaj10hSTsKYIyk2MkCN8ShWSESesHqqR6vtOWCUtcvVeJaERnRgGxp8ybTfeNa8BtLM3hXQQBO%2BZBpV%2BxpzDWJfQOitJHt%2BpdXwTS2AGHA260rXgs2yI%2BDfmS8rQNrTi1ajCInJkjGPQcH0TSOOB%2B8%2BO670B9SPR10oBLNPnDo5NzMzOzc9fXoWRI%2FYccf4yYn99M2EfP2HD%2F%2F8FQ5HV8UQmh10E3RDopfvU47s6Z3mnWEUBiiJDrWVW%2BJhLfkRbEmXVudzS6ZA3KbweQELazwXdXFDVkk29RFdZaSiJ0LGAU25QXnD%2BOPiHWcwGOIIV8aPTsVepmBIdPKGPHkz6%2FBDfMk7sffUqwhcouGYvd3BrU40%2FgXcnRlGcBAAAA%3D%3D'
+    fenixScheduleUrl = "https://" + hostname + "/publico/findSpaces.do"
+    fenixTagusPOSTData = "_request_checksum_=f67a3295c65e704ecd76a260bd9c1c154de2248f&"\
+        "contentContextPath_PATH=%2Fconteudos-publicos%2Fpesquisa-de-espacos&"\
+        "method=search&"\
+        "net.sourceforge.fenixedu.dataTransferObject.spaceManager.FindSpacesBean%3A1016610194%3AsearchType=SPACE&"\
+        "net.sourceforge.fenixedu.dataTransferObject.spaceManager.FindSpacesBean%3A1016610194%3AlabelToSearch=&"\
+        "net_sourceforge_fenixedu_dataTransferObject_spaceManager_FindSpacesBean_1016610194_campuspostback=&"\
+        "net.sourceforge.fenixedu.dataTransferObject.spaceManager.FindSpacesBean%3A1016610194%3Acampus=net.sourceforge.fenixedu.domain.space.Campus%3A2465311230082&"\
+        "net.sourceforge.fenixedu.dataTransferObject.spaceManager.FindSpacesBean%3A1016610194%3Abuilding=net.sourceforge.fenixedu.domain.space.Building%3A2972117375196&"\
+        "pt.ist.fenixWebFramework.renderers.components.state.LifeCycleConstants.VIEWSTATE_LIST=H4sIAAAAAAAAAL1Y32scRRyfXJLmkv5MWqpoS6u0WCrdTRt%2FtKZVk2uunl5N8NKWRhDndudy087NjjOzl4uiqA%2FVVwVFwT5Y6Jt%2FgCj6IIJPggqCTwWh6IOoDwUFf4Dfmd293fSu7dlq7mFvd%2FY735%2Bf74%2FZD35Gg0qizWdwEzuhpsyZkhIvl6nSrVe%2B2f7uF%2Fh8P%2BoroQFFnyctgRDqWxowV9h0RGgH6Jwa4bR1ilSLEjfIUiDPOpJwn0gileMFDRFwwrVylMaaOCcpWaqYu7ev7PiITf0wlEOjCygvAqWnsXd2AY2os1ScED6QLKAN5uEkZhQeacAX0ObQvikkbOclAbLBpiFZQENNqmiVkTIawVpLWg01URptLBvzXGOeexyLyTJa5wVck5YuMKyAYDQiYJgvunYJSMa8UIId%2BihwoNyK12imLLQLNrsdNrttm93UZtfa7BqbM2yMfD99VM%2Bhl1B%2FGa2tU98nvMICDSptyuhsogGbctTXaCyjagVM5IvwZhPlIsxqalgOltEahpeDUJunIfBJg2g8Wz1DPK3R%2Fb1Y0gh8Ai5rbwNRI0IGgkhNjWO3ZpSca68D1UCo4B492LuQE7ChBOZrqpcnW6LPYKxvJTIfw6quMYR388cbd9%2F1%2BOUP%2B1GuiEZYgP0i9nQgS2hY1yVR9YD5LfHIo8j8ckt5uPab21ZTooM9gdaCQzkl49ZC9ITSX0sIG7R1HSL6dAplUL5wsxmSCeXpz98Y7j%2F80%2Fkc6oc8kcSnEiIBsQW%2FhYzEsR0QWNftPSQpKOGKsMqoF2i0361R7lcE9ohy%2FOARAEE98I8ISQSWpEKw9OrR27lY8ZY1zv5sriMw%2FrYqwfwU1fUyrhI2H0T7Skct6Rgy1y03I0ujIQhpyLAEdx3qwV0WLU6FNgQjKTBfGz3mVv%2Fe8zU4CWqVBzSQFNazimoQrDXsNUquAccFcQpkUynGd0uiiZ6VSMUfny6e%2FW3vq%2FmcSbohTxIMaNTood7hX%2BIQfO6RQrR3cmU5iDXP5J5ZGYYV5dVJAz8JbGMgDKr2hgSm2UiCl7ekGZXm7KGxr54XDzz8Tg71lVHeJzUcsojNcKs71CELNNo5Z2FWbEfdQGSmpSWeFba2tRUYsAoMgPz9%2F8rBxv4%2F791x8fe32NYc2gQpQFUBg9W%2BzQbsz3K2vIDWKxvj0iIPIEUgyNWQ%2B%2B3sGIaMboKhRJqFAVt%2FrYXQWsKEaC3UZE9SkdRPWBrNLBUD2cBJKR2uEyZsKiQLzDxMycXxeCFvF54gy%2FHzNUuxWclDAvM0hiPNqOMFbcxubBpFj6%2FcZAOzvUuMzcJdHQHL6cQrkHRHZ4pTJ8rzcOeZfmeK%2BQYGUTmwk1HKGeWkG3qgKqd7hf1ptM1a6pjMd5QBgaNsojt6WYCoQYl9GhhOOzTg1b6ahzfdoHm4Z2jMSdqgmjYzPvnsde1e%2BvHK3hzwMrzvvIFn8tYza7MFPUt7%2BO2L0x2LL0n0LCfaUUEoPVIL5CKJlCV%2B6EDE8LzEXNWIjFSK%2FHEcc7xIpJNmyTQU013RbVQUCxLKlKTYOCbpMmMgT6INNltNjXJmeNjIvgTfD1bmpgozVs3dPQMBmpQd5zTKTYz3HObbrg6zcuyKiEO7nmU7Q3ddJm4tJObSpTehnuzvt7wHTRHK2q9t3qcTXrt9g0VQbpsUYBdPiaevGXlocAo6uGUxTyHUKVwTHmolFgq4IUI1F7%2BEzKzZ8qLRrl0vWMISj1aA4wr2ptS%2FeI2gmSUnidftnfHyrFCNtjQID%2FcpwgCi%2B4y9VbA3DuOaiKhbdhZvmJ1Q%2BQlXpu47NTuRQWdxjgYNTHmap79%2Bv%2BfSJ%2Fy7y7bVjMBkRSTHrORH08stZG7e0uavhYbugBLJz7x7RkOrMB2YQFvpZHBrnHeQxDuznheKaPaf8iAw6pgMwi5sb03e3YuEQ03xZpqAndURuY0B59WybxuMLqsm7I5M9kL26P9TVMjpKsXrniXoOwDKGTNeWGm9yu1ei6HsrD9w3wP3T%2Bzff2BifPzggX%2FZmXKdRffp%2F7DoToeU%2BXBi%2Fj%2FL7h2dZbcai4VWkym8cb3NJ29Xr2OK1uF3jrzZrcIf%2B49mm3NDg%2Bf%2Ben%2Frpzk0Aucw7GGfNKhXgnO0BKRpVCqDIDcjyE0Eub7tFq6mDeJ6mEFIsaxoGXo6lMSduooVnJNGEwc%2BRUA3AmcojcZvyN8q7yaAADYbo76XYeL0yCRq5eajDskcfDTanDleTgcBA78A0coxKRn407FYo%2Bp15HZEwc1Gwe1xwgQ1tkYgJBF5xup9PVpt9wGjYfs4F399gKPKuiU4AlbMAS3%2BOnEBpJm1U1fXGovACwBbAdCbzQ4XtfZkYSYTwIBzpql0IzhTdQT8O1NVBZ72dDRaRJ7YVTHmMZjrfHNUi6CN%2BuyU0R%2FQeLzorFASjaYjdhynL3fKl799749fYHP0cTGE41Cf4VA2l0mT6tcpYV7AwgYvJAcrlD1ljeo6IzW9M2QclJeLlLeM%2BcdubrYqGvLsp7MVZsdf4XaXIY5pGKuE89D14JycRNQwmIQ4tP4BooNt0w4WAAA%3D"
         
     # Get the page with the room list (includes POST data)
     f = urllib.urlopen(fenixScheduleUrl, fenixTagusPOSTData)
@@ -124,7 +135,7 @@ def get_room_names():
             print "Found room with schedule: '" + room + "'"
             
             # ...and save the corresponding URL, using the roomName as the key
-            roomUrls[room] = "https://fenix.ist.utl.pt" + tag.contents[1]['href'] 
+            roomUrls[room] = "https://" + hostname + tag.contents[1]['href'] 
 
     return roomUrls
 
@@ -132,14 +143,17 @@ def get_room_names():
 if __name__ == '__main__':
     outfile = "conv-tables.txt"
     androidParse = False
-    opt, arg = getopt.getopt(args, "ha")
+    opts, args = getopt.getopt(sys.argv[1:], "ha")
+
     # Parse the arguments
-    for opt in opts:
+    for (opt, arg) in opts:
       if opt == '-h':
         print 'PyGetRoomSched [-a (output to android format)]'
+        sys.exit()
       elif opt == '-a':
         outfile = "android-conv-tables.txt"
         androidParse = True
+        print "Printing android version to file"
 
     # Get all the room names with schedules, and their URLs
     roomNameList = get_room_names()
@@ -156,15 +170,8 @@ if __name__ == '__main__':
         roomNameList.pop(room)
         print "Filtering out room '" + room + "'"
 
-    # Generate Room array
-    roomArray = ''
-    for (room,url) in roomNameList.items():
-      # ...
-      roomArray += 'ClassRoom.create(name: ' + room + '),'
-
-    roomArray = 'rooms = [ ' + roomArray + ' ]'
-
     # Run through the 'roomNameList'...
+    roomArray = 'rooms = [ ' 
     for (roomName, roomUrl) in roomNameList.items():
         # ...opening every link and saving its schedule table...
         table  = get_table_from_url(roomUrl)
@@ -174,11 +181,17 @@ if __name__ == '__main__':
           generatedLine = convert_html_to_android(table)
           generatedLine = roomName + "\n" + generatedLine
         else:
+          # Add room to array
+          roomArray += roomName + ', '
           # Build ruby command to create the room and the schedule for it
           generatedLine = generate_rails_command(table, roomName) + "\n" 
 
         #...and adding it to the output string
         output += generatedLine
+
+    # Add the array of rooms and a couple of newlines
+    if !androidParse:
+      output = roomArray + " ]\n\n"
         
     # Write to file
     f = open(outfile, "w")
