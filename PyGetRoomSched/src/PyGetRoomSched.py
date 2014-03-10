@@ -10,7 +10,7 @@ Depends on the BeautifulSoup library for advanced HTML parsing.
 @since: 21/09/2012
 @change: 23/04/2013
 '''
-
+import sys
 import urllib
 import BeautifulSoup
 import re
@@ -64,6 +64,24 @@ def convert_html_to_android(table):
         
     return matrix
 
+# Generates ruby commands to create the schedule in 
+# this table on a Rails app, linked to the respective
+# room.
+def generate_rails_command(table, room):
+  # Create the Room
+  returnValue = 'ClassRoom.create name: ' + room
+
+  # Call the android version to obtain a converted array
+  convertedArray = convert_html_to_android(table)
+  
+  # Run through the array line-by-line
+  for line in convertedArray.split('\n'):
+    # Check if there are ones or zeroes
+      # If so, discover where, and which hours they match
+      # ...and build the command string
+      'Occupation.create({time_start: , time_end: , weeknumber: , class_room_id: })'
+
+
 # Gets all the names of the rooms with schedules
 def get_room_names():
     # Define the fetching strings
@@ -112,6 +130,17 @@ def get_room_names():
 
 # Main Method
 if __name__ == '__main__':
+    outfile = "conv-tables.txt"
+    androidParse = False
+    opt, arg = getopt.getopt(args, "ha")
+    # Parse the arguments
+    for opt in opts:
+      if opt == '-h':
+        print 'PyGetRoomSched [-a (output to android format)]'
+      elif opt == '-a':
+        outfile = "android-conv-tables.txt"
+        androidParse = True
+
     # Get all the room names with schedules, and their URLs
     roomNameList = get_room_names()
     
@@ -126,21 +155,33 @@ if __name__ == '__main__':
     for room in roomFilter:
         roomNameList.pop(room)
         print "Filtering out room '" + room + "'"
-    
+
+    # Generate Room array
+    roomArray = ''
+    for (room,url) in roomNameList.items():
+      # ...
+      roomArray += 'ClassRoom.create(name: ' + room + '),'
+
+    roomArray = 'rooms = [ ' + roomArray + ' ]'
+
     # Run through the 'roomNameList'...
     for (roomName, roomUrl) in roomNameList.items():
         # ...opening every link and saving its schedule table...
         table  = get_table_from_url(roomUrl)
         
         # ...converting the table into the Android format...
-        androidArray = convert_html_to_android(table)
-        androidArray = roomName + "\n" + androidArray
-        
+        if androidParse:
+          generatedLine = convert_html_to_android(table)
+          generatedLine = roomName + "\n" + generatedLine
+        else:
+          # Build ruby command to create the room and the schedule for it
+          generatedLine = generate_rails_command(table, roomName) + "\n" 
+
         #...and adding it to the output string
-        output += androidArray
+        output += generatedLine
         
     # Write to file
-    f = open("conv-tables.txt", "w")
+    f = open(outfile, "w")
     f.write(output)
     f.close()
     
