@@ -42,7 +42,11 @@ def convert_html_to_android(table):
     return convert_html_to_array(table, '\t','\n')
 
 
-def convert_html_to_array(table, item_separator, line_separator):
+# Converts the HTML timetable into an array of occupations
+# By default, occupation is determined by 0's and 1's, but
+# lambda expressions may be specified to customize this behavior
+def convert_html_to_array(table, item_separator, line_separator,\
+                          occupied_function=(lambda i,j: 1), empty_function=(lambda i,j:0)):
     # Make soup for the table
     if table == None:
         print "stop"
@@ -51,25 +55,25 @@ def convert_html_to_array(table, item_separator, line_separator):
     
     # For each tableRow (until the 25th, and the first doesn't count)
     matrix = ""
-    for tableRow in rows:
+    for (i,tableRow) in enumerate(rows):
         # Make soup for the tableRow, getting all 'td' elements
         moreSoup = BeautifulSoup.BeautifulSoup(tableRow.prettify())
         tableDivisions = moreSoup.findAll("td")
         
         # For each inner 'td'
-        for cellElement in tableDivisions:
+        for (j,cellElement) in enumerate(tableDivisions):
             # See if 'class' attribute is not 'period-empty-slot'
             if cellElement["class"] != "period-empty-slot":
-                # Mark line with '1'
-                matrix += "1"
+                # Mark line acoording to the occupied function
+                matrix += str(occupied_function(i,j))
             # ...if not...
             else:
-                # Mark line with '0'
-                matrix += "0"
-            # Add tab
+                # Mark line with the empty function 
+                matrix += str(empty_function(i,j))
+            # Add separator 
             matrix += item_separator
         
-        # Add "\n"
+        # Add a line separator
         if len(matrix) > 0:
             matrix += line_separator
         
@@ -78,20 +82,29 @@ def convert_html_to_array(table, item_separator, line_separator):
 # Generates ruby commands to create the schedule in 
 # this table on a Rails app, linked to the respective
 # room.
-def generate_rails_command(table, room):
+def generate_rails_command(table, room, start_time, slot_time:
   # Create the Room
-  returnValue = 'ClassRoom.create name: ' + room
+  #returnValue = 'ClassRoom.create name: ' + room # No longer needed (this only builds the array; the for actually creates, afterwards)
 
   # Call the android version to obtain a converted array
   convertedArray = convert_html_to_android(table)
-  
-  # Run through the array line-by-line
-  for line in convertedArray.split('\n'):
-    # Check if there are ones or zeroes
-      # If so, discover where, and which hours they match
-      # ...and build the command string
-      'Occupation.create({time_start: , time_end: , weeknumber: , class_room_id: })'
 
+  # This function takes the table's start time, and 
+  # calculates the respective start and end times 
+  # through the line index and the slot period. Column
+  # numbers are used to calculate the weekday, and 
+  # an hardcoded 'class_id' variable is written.
+  occupied_function = (lambda i,j: '{ time_start: ' + str(start_time + (i*slot_time)) + ', time_end: ' + str(start_time + ((i+1)*slot_time)) + ', weeknumber: ' + str(j) + ', class_room_id: class_id }')
+
+  # Should call convert_html_toArray with:
+  empty_function = (lambda i,j: '')
+  convertedArray = convert_html_to_array(table, ',\n  ', '', occupied_function, empty_function)
+  # ',\n  ' as the item separator (each item should break the line and tab)
+  # '' as a line separator (each item is an item on the array, already)
+  # A function factoring in the number of line, column, period interval,
+  # this table's start time and the room name
+  # A function returning an empty string 
+  
 
 # Gets all the names of the rooms with schedules
 def get_room_names():
@@ -190,7 +203,7 @@ if __name__ == '__main__':
         output += generatedLine
 
     # Add the array of rooms and a couple of newlines
-    if !androidParse:
+    if not androidParse:
       output = roomArray + " ]\n\n"
         
     # Write to file
