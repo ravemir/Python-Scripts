@@ -16,6 +16,7 @@ import urllib
 import BeautifulSoup
 import re
 import getopt
+from bunch import Bunch
 
 import pdb
 
@@ -82,12 +83,13 @@ def convert_html_to_array(table, item_separator, line_separator,\
 # Generates ruby commands to create the schedule in 
 # this table on a Rails app, linked to the respective
 # room.
-def generate_rails_command(table, room, start_time, slot_time:
+def generate_rails_command(table, room, start_time, slot_time):
   # Create the Room
   #returnValue = 'ClassRoom.create name: ' + room # No longer needed (this only builds the array; the for actually creates, afterwards)
 
   # Call the android version to obtain a converted array
   convertedArray = convert_html_to_android(table)
+
 
   # This function takes the table's start time, and 
   # calculates the respective start and end times 
@@ -98,7 +100,9 @@ def generate_rails_command(table, room, start_time, slot_time:
 
   # Should call convert_html_toArray with:
   empty_function = (lambda i,j: '')
-  convertedArray = convert_html_to_array(table, ',\n  ', '', occupied_function, empty_function)
+  bunch_of_functions = Bunch(occupied_function, empty_function)
+
+  convertedArray = convert_html_to_array(table, ',\n  ', '', bunch_of_functions.occupied_function, bunch_of_functions.empty_function)
   # ',\n  ' as the item separator (each item should break the line and tab)
   # '' as a line separator (each item is an item on the array, already)
   # A function factoring in the number of line, column, period interval,
@@ -113,13 +117,11 @@ def get_room_names():
     fenixTagusPOSTData = "_request_checksum_=f67a3295c65e704ecd76a260bd9c1c154de2248f&"\
         "contentContextPath_PATH=%2Fconteudos-publicos%2Fpesquisa-de-espacos&"\
         "method=search&"\
-        "net.sourceforge.fenixedu.dataTransferObject.spaceManager.FindSpacesBean%3A1016610194%3AsearchType=SPACE&"\
-        "net.sourceforge.fenixedu.dataTransferObject.spaceManager.FindSpacesBean%3A1016610194%3AlabelToSearch=&"\
-        "net_sourceforge_fenixedu_dataTransferObject_spaceManager_FindSpacesBean_1016610194_campuspostback=&"\
-        "net.sourceforge.fenixedu.dataTransferObject.spaceManager.FindSpacesBean%3A1016610194%3Acampus=net.sourceforge.fenixedu.domain.space.Campus%3A2465311230082&"\
-        "net.sourceforge.fenixedu.dataTransferObject.spaceManager.FindSpacesBean%3A1016610194%3Abuilding=net.sourceforge.fenixedu.domain.space.Building%3A2972117375196&"\
-        "pt.ist.fenixWebFramework.renderers.components.state.LifeCycleConstants.VIEWSTATE_LIST=H4sIAAAAAAAAAL1Y32scRRyfXJLmkv5MWqpoS6u0WCrdTRt%2FtKZVk2uunl5N8NKWRhDndudy087NjjOzl4uiqA%2FVVwVFwT5Y6Jt%2FgCj6IIJPggqCTwWh6IOoDwUFf4Dfmd293fSu7dlq7mFvd%2FY735%2Bf74%2FZD35Gg0qizWdwEzuhpsyZkhIvl6nSrVe%2B2f7uF%2Fh8P%2BoroQFFnyctgRDqWxowV9h0RGgH6Jwa4bR1ilSLEjfIUiDPOpJwn0gileMFDRFwwrVylMaaOCcpWaqYu7ev7PiITf0wlEOjCygvAqWnsXd2AY2os1ScED6QLKAN5uEkZhQeacAX0ObQvikkbOclAbLBpiFZQENNqmiVkTIawVpLWg01URptLBvzXGOeexyLyTJa5wVck5YuMKyAYDQiYJgvunYJSMa8UIId%2BihwoNyK12imLLQLNrsdNrttm93UZtfa7BqbM2yMfD99VM%2Bhl1B%2FGa2tU98nvMICDSptyuhsogGbctTXaCyjagVM5IvwZhPlIsxqalgOltEahpeDUJunIfBJg2g8Wz1DPK3R%2Fb1Y0gh8Ai5rbwNRI0IGgkhNjWO3ZpSca68D1UCo4B492LuQE7ChBOZrqpcnW6LPYKxvJTIfw6quMYR388cbd9%2F1%2BOUP%2B1GuiEZYgP0i9nQgS2hY1yVR9YD5LfHIo8j8ckt5uPab21ZTooM9gdaCQzkl49ZC9ITSX0sIG7R1HSL6dAplUL5wsxmSCeXpz98Y7j%2F80%2Fkc6oc8kcSnEiIBsQW%2FhYzEsR0QWNftPSQpKOGKsMqoF2i0361R7lcE9ohy%2FOARAEE98I8ISQSWpEKw9OrR27lY8ZY1zv5sriMw%2FrYqwfwU1fUyrhI2H0T7Skct6Rgy1y03I0ujIQhpyLAEdx3qwV0WLU6FNgQjKTBfGz3mVv%2Fe8zU4CWqVBzSQFNazimoQrDXsNUquAccFcQpkUynGd0uiiZ6VSMUfny6e%2FW3vq%2FmcSbohTxIMaNTood7hX%2BIQfO6RQrR3cmU5iDXP5J5ZGYYV5dVJAz8JbGMgDKr2hgSm2UiCl7ekGZXm7KGxr54XDzz8Tg71lVHeJzUcsojNcKs71CELNNo5Z2FWbEfdQGSmpSWeFba2tRUYsAoMgPz9%2F8rBxv4%2F791x8fe32NYc2gQpQFUBg9W%2BzQbsz3K2vIDWKxvj0iIPIEUgyNWQ%2B%2B3sGIaMboKhRJqFAVt%2FrYXQWsKEaC3UZE9SkdRPWBrNLBUD2cBJKR2uEyZsKiQLzDxMycXxeCFvF54gy%2FHzNUuxWclDAvM0hiPNqOMFbcxubBpFj6%2FcZAOzvUuMzcJdHQHL6cQrkHRHZ4pTJ8rzcOeZfmeK%2BQYGUTmwk1HKGeWkG3qgKqd7hf1ptM1a6pjMd5QBgaNsojt6WYCoQYl9GhhOOzTg1b6ahzfdoHm4Z2jMSdqgmjYzPvnsde1e%2BvHK3hzwMrzvvIFn8tYza7MFPUt7%2BO2L0x2LL0n0LCfaUUEoPVIL5CKJlCV%2B6EDE8LzEXNWIjFSK%2FHEcc7xIpJNmyTQU013RbVQUCxLKlKTYOCbpMmMgT6INNltNjXJmeNjIvgTfD1bmpgozVs3dPQMBmpQd5zTKTYz3HObbrg6zcuyKiEO7nmU7Q3ddJm4tJObSpTehnuzvt7wHTRHK2q9t3qcTXrt9g0VQbpsUYBdPiaevGXlocAo6uGUxTyHUKVwTHmolFgq4IUI1F7%2BEzKzZ8qLRrl0vWMISj1aA4wr2ptS%2FeI2gmSUnidftnfHyrFCNtjQID%2FcpwgCi%2B4y9VbA3DuOaiKhbdhZvmJ1Q%2BQlXpu47NTuRQWdxjgYNTHmap79%2Bv%2BfSJ%2Fy7y7bVjMBkRSTHrORH08stZG7e0uavhYbugBLJz7x7RkOrMB2YQFvpZHBrnHeQxDuznheKaPaf8iAw6pgMwi5sb03e3YuEQ03xZpqAndURuY0B59WybxuMLqsm7I5M9kL26P9TVMjpKsXrniXoOwDKGTNeWGm9yu1ei6HsrD9w3wP3T%2Bzff2BifPzggX%2FZmXKdRffp%2F7DoToeU%2BXBi%2Fj%2FL7h2dZbcai4VWkym8cb3NJ29Xr2OK1uF3jrzZrcIf%2B49mm3NDg%2Bf%2Ben%2Frpzk0Aucw7GGfNKhXgnO0BKRpVCqDIDcjyE0Eub7tFq6mDeJ6mEFIsaxoGXo6lMSduooVnJNGEwc%2BRUA3AmcojcZvyN8q7yaAADYbo76XYeL0yCRq5eajDskcfDTanDleTgcBA78A0coxKRn407FYo%2Bp15HZEwc1Gwe1xwgQ1tkYgJBF5xup9PVpt9wGjYfs4F399gKPKuiU4AlbMAS3%2BOnEBpJm1U1fXGovACwBbAdCbzQ4XtfZkYSYTwIBzpql0IzhTdQT8O1NVBZ72dDRaRJ7YVTHmMZjrfHNUi6CN%2BuyU0R%2FQeLzorFASjaYjdhynL3fKl799749fYHP0cTGE41Cf4VA2l0mT6tcpYV7AwgYvJAcrlD1ljeo6IzW9M2QclJeLlLeM%2BcdubrYqGvLsp7MVZsdf4XaXIY5pGKuE89D14JycRNQwmIQ4tP4BooNt0w4WAAA%3D"
-        
+        "net.sourceforge.fenixedu.dataTransferObject.spaceManager.FindSpacesBean%3A607828615%3AsearchType=SPACE&"\
+        "net.sourceforge.fenixedu.dataTransferObject.spaceManager.FindSpacesBean%3A607828615%3AlabelToSearch=&"\
+        "net_sourceforge_fenixedu_dataTransferObject_spaceManager_FindSpacesBean_607828615_campuspostback=&"\
+        "net.sourceforge.fenixedu.dataTransferObject.spaceManager.FindSpacesBean%3A607828615%3Acampus=net.sourceforge.fenixedu.domain.space.Campus%3A2465311230082&net.sourceforge.fenixedu.dataTransferObject.spaceManager.FindSpacesBean%3A607828615%3Abuilding=net.sourceforge.fenixedu.domain.space.Building%3A2972117375196&pt.ist.fenixWebFramework.renderers.components.state.LifeCycleConstants.VIEWSTATE_LIST=H4sIAAAAAAAAALVXy28bRRifOE7jpI80SZUiVGiQUgmBspsmtPRBKYmTFINDIpy2alAlxrvjeJLx7DAz6zhFVMChPXMAgUQPHLjxB6AicULihARI%2FAeIC4ILEkg8JL6ZXXvXddKatqwUZ2fmm%2B%2F5%2Bx772S%2BoT0k0uoHr2Ak1Zc6slHi7SJVuvPP9Yx99jW%2F1op4Cyip6jTQEQqhnK2t%2B4dI5oR2gcyqE08ZlUl6UuEa2ArnpSMJ9IolUjhfURMAJ18pRGmviXKJkq2TePvjt6G02%2B1N%2FBg2voZwIlJ7D3uYaGlSbVFwUPpCsoQNmcQkzCksa8DU0GtqTfJPtqiRA1lc3JGuov04VLTNSRINYa0nLoSZKo6GiMc815rlLWJwton1ewDVp6DzDCgiGIwKG%2Bbprt4BkxAsl2KHngQPlVrxGC0WhXbDZ7bDZbdnsJja71mbX2JxiY%2BT7yVK9ga6j3iLaW6W%2BT3iJBRpUOpjS2UQDLmWor9FIStUSmMjX4eQg5SJMa2pY9hXRHoa3g1CbVT%2F4pEY0Xi5vEE9rdKIbS2qBT8BlrWsgalDIQBCpqXHsWErJldY%2BUGVDBe%2Fo2e6FXIQLBTBfU719NgJaT087Ml%2FEqqoxhHf0i6FjT7z04%2Be9KLOIBlmA%2FUXs6UAW0ICuSqKqAfMb4vwLyDy5rRz87jWvjbpEp7oCrQWHcgrGrflohZKnIYQN2r4OET06gTIon7%2FfDEmF8spX7w30PvfzrQzqhTyRxKcSIgGxBb%2BFjMSxzQqsq%2FYdfAdKuCIsM%2BoFGh13K5T7JYE9ohw%2FOA8gqAb%2BOSGJwJKUCJZeNTpdiRVvCI0Olwnml6muFnGZsNUgoivMW7tHkPk9dD%2B8NeqHEIYMS3DP6S7cY9HhlGhNMJIA8ebwBbf8z5PfgVOgNnlAA0lgPamoBsFaw12j5B5wVBBDPp06MZ4bEs10rUQifmlucfP3p97NZUyS9XuSYECfRme6h3uBQ7C5R%2FLR3bPt6R9rnso1szMAO8qrkhp%2BBdjGge9TrQtNWNrHVmnUAC8fSjIoydHTI99eEyef%2FzCDeooo55MKDlnEZqCxM7SRgcX4ioXVYivqBiILDS3xsrC1rKVA1iqQBfnH%2F5ODjf1%2FPX300z%2FeZ2MZdBAgT1Ueg9W%2BRT%2F2lznbXkP7lY1xYZ0HkBIQ5HLI%2FVY2DEAG18FQIs1G1tZbayG0krBJtBdqsCepaNZL2BpObS0GsoabpXOgSpiwqdDcYGYxK9en4o2c3XiZbMfrXUuv2clBwvIkhoP1qMMFLcwO1Y2iS%2B2XbGCO7BBjszHeEbCMbnoFkm5%2BYXH2YnEV3jzT30zxPsAgKtPjjFLOKCc7oQf%2BkrvCPhodsZY6JvMdZUDgKJvojt4WIKpPYp8GhtPjGvBqj1bhpIN5JG6ia3ugttopRKPMzFTX2h6%2BU1vl2B0Ra7ifpQvcAyuZ1RZXycTQagdp7UEspHadAvrjCeQKJ9pRQSg9UgnkOomyhfihA8VUQXew7FYpkamsafJQkWVLmON1IMjjmgjVSnwIKKhYKGs0MfGmJSzwaAc4trE3ZeWtXTxrtiabTn2k06meFarRoRrh4aQiDFA7aWwvg%2B2xr%2FdERA%2Fs5Eyn%2F157iP6bCynzYbD6Pz34aKcHy7FYQFDKh7Hrcs3TTuc1Js7cvrlT4b%2Bwq0%2Bg1uBVibmqEBkVmHYPJPV9DsaAG%2F19N%2F7%2BZOzLDBqELos97JMa9QowFUkoUxoViiDITQlym4JcP6hhyl1Na8T1MAPPYwlTa%2BjpUBJ39g5W0AWHm3a%2BSkA3Ah1So6l78rfKu824AZuhCGkpJk6XTKLkMSM6SbU1jUZTw8NcEDDwCxC1V49mOU%2BKnkblu8jtiIKbjoLbHoWJ6DWSlJcw5kiKjQxQYyzCConIU1ZPdmm1vQeMBuxyJZ4loRHt24IGXzLtN541r4I0s3cZNNCEL5hGlXzGXAXsC4DecrrnV1oN39QCwICzUVe6FmyUHQH%2FndmyAk97et5qFHliomTMY1AwfdOII2ijHjuu9AbUj0ddKATTz5w8MXP8%2BPTM1NSpaRA9bMcdEycnjtM34%2FLtHz7%2B81e4HH0qhtDsoJug6xK9%2FpByZNfoxJrDzIxg2DyQKLfAw1r6EGzpK63M5hdMgbhL4fMCFtZ4PurihqySburDuspIRY%2BHjIM35TrlDROPC%2FecwWCII1yZODoV%2BzEFQ6KzaMjTX2ZtcYg%2F8o4VwXEJrsqE8xC%2BgSG%2FY4gZBvBJJxr%2FAoQQU7FtEAAA"        
+
     # Get the page with the room list (includes POST data)
     f = urllib.urlopen(fenixScheduleUrl, fenixTagusPOSTData)
     html = f.read()
@@ -156,6 +158,8 @@ def get_room_names():
 if __name__ == '__main__':
     outfile = "conv-tables.txt"
     androidParse = False
+
+    # Specify available options ('-h' and '-a')
     opts, args = getopt.getopt(sys.argv[1:], "ha")
 
     # Parse the arguments
@@ -167,7 +171,6 @@ if __name__ == '__main__':
         outfile = "android-conv-tables.txt"
         androidParse = True
         print "Printing android version to file"
-
     # Get all the room names with schedules, and their URLs
     roomNameList = get_room_names()
     
@@ -189,6 +192,7 @@ if __name__ == '__main__':
         # ...opening every link and saving its schedule table...
         table  = get_table_from_url(roomUrl)
         
+
         # ...converting the table into the Android format...
         if androidParse:
           generatedLine = convert_html_to_android(table)
@@ -196,8 +200,18 @@ if __name__ == '__main__':
         else:
           # Add room to array
           roomArray += roomName + ', '
+          pdb.set_trace()
+          
+          # TODO Get this table's staring time and slot time
+          sp = BeautifulSoup.BeautifulSoup(table.prettify())
+          first_slot = sp.find('th', id='hour0').contents[0]
+          start_time = datetime.strptime(first_slot.split('-')[0], '\n %H:%M')
+          slot_time = datetime.strptime(first_slot.split('-')[1]  ,"%H:%M\n ") - start_time # TODO Refactor this code section to be prettier
+
+          pdb.set_trace()
+
           # Build ruby command to create the room and the schedule for it
-          generatedLine = generate_rails_command(table, roomName) + "\n" 
+          generatedLine = generate_rails_command(table, roomName, start_time, slot_time) + "\n" 
 
         #...and adding it to the output string
         output += generatedLine
