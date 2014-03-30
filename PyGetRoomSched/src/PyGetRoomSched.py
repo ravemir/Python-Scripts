@@ -37,6 +37,20 @@ def get_table_from_url(url):
     
     return sched
 
+# Get the start and slot time from the given table
+def get_start_and_slot_from_table(table):
+  sp = BeautifulSoup.BeautifulSoup(table.prettify())
+
+  # This table's starting time-interval is a table header element, of id 'hour0'
+  first_slot = sp.find('th', id='hour0').contents[0]
+
+  # Compute the start and slot times by splitting 
+  # and calculating the appropriate elements
+  start_time = datetime.strptime(first_slot.split('-')[0], '\n %H:%M')
+  slot_time = datetime.strptime(first_slot.split('-')[1]  ,"%H:%M\n ") - start_time # TODO Refactor this code section to be prettier
+
+  return start_time, slot_time
+
 # Converts the HTML room snippet to the format used
 # in the Study@Tagus application 
 def convert_html_to_android(table):
@@ -200,13 +214,9 @@ if __name__ == '__main__':
         else:
           # Add room to array
           roomArray += roomName + ', '
-          pdb.set_trace()
           
-          # TODO Get this table's staring time and slot time
-          sp = BeautifulSoup.BeautifulSoup(table.prettify())
-          first_slot = sp.find('th', id='hour0').contents[0]
-          start_time = datetime.strptime(first_slot.split('-')[0], '\n %H:%M')
-          slot_time = datetime.strptime(first_slot.split('-')[1]  ,"%H:%M\n ") - start_time # TODO Refactor this code section to be prettier
+          # Get this table's staring time and slot time
+          start_time, slot_time = get_start_and_slot_time_from_table(table)
 
           pdb.set_trace()
 
